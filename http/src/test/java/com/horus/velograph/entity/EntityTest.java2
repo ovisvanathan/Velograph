@@ -1,0 +1,149 @@
+package com.horus.velograph.entity;
+
+import java.util.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import javax.persistence.Entity;
+
+
+import static org.junit.Assert.assertEquals;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import junit.framework.TestCase;
+import com.horus.velograph.service.DAOService;
+import com.horus.velograph.util.Utils;
+import com.horus.velograph.api.User;
+
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
+
+import static org.hamcrest.Matchers.greaterThan;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import io.restassured.RestAssured;
+import io.restassured.http.Cookie;
+//import io.restassured.response.Response;
+
+
+@Entity
+public class EntityTest<T> extends TestCase {
+
+	String baseURI = "http://localhost:8080/server-example/rest";
+
+	@Before
+	public void setup() {
+	//	RestAssured.baseURI = baseURI;
+	//	RestAssured.port = 8080;
+	RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+	}
+
+	public EntityTest() {
+
+	//	setup();
+		RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+	
+		testSaveGift();		
+
+		testGetGift();		
+
+		testUpdateGift();		
+
+		testDeleteGift();		
+
+		testSaveCountry();		
+
+		testGetCountry();		
+
+		testUpdateCountry();		
+
+		testDeleteCountry();		
+
+	}
+	
+	@Test
+	public void testSaveCountry() {
+	
+		  given().queryParam("id", 1).queryParam("countryName", "Denmark").queryParam("population", 200000000)
+		  .when()
+			  .request("POST", baseURI + "%2Fcountries")
+			  .then()
+			  .statusCode(201);	
+	
+	}
+
+	@Test
+	public void testGetCountry() {
+	
+		when()
+		.request("GET", baseURI + "/countries/1").then().statusCode(200);
+		
+	}
+	
+	public void testUpdateCountry() {
+	
+		  given().queryParam("id", 1).queryParam("countryName", "Denmark").queryParam("population", 250000000)
+		 	  .when()
+			  .request("PUT", baseURI + "/countries")
+			  .then()
+			  .statusCode(201);
+	}
+
+	public void testGetCountry2() {
+	
+			when().request("GET", baseURI + "/countries/1").then().statusCode(200);
+	}
+
+
+	public void testDeleteCountry() {
+	
+			  when()
+			  .request("DELETE", baseURI + "/countries/1")
+			  .then()
+			  .statusCode(201);
+
+	
+	}
+
+	public void testSaveGift() {
+	
+			given().queryParam("name", "Toyset")
+		 	  .when()
+			  .request("POST", baseURI + "/gifts")
+			  .then()
+			  .statusCode(201);	
+	
+	}
+
+	public void testGetGift() {
+			when()
+			.request("GET", baseURI + "/gifts/100").then().statusCode(200);
+	}
+
+	public void testUpdateGift() {
+
+	}
+
+	public void testDeleteGift() {
+
+	}
+
+	public static void main(String [] args) {
+		new EntityTest();
+	}
+	
+}

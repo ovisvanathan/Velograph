@@ -1,0 +1,143 @@
+package com.baeldung.hibernate.persistjson;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.*;
+import java.util.Properties;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class PersistJSONUnitTest {
+
+    private Session session;
+
+    @Before
+    public void init() {
+        try {
+            Configuration configuration = new Configuration();
+
+            Properties properties = new Properties();
+            properties.load(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("hibernate-persistjson.properties"));
+
+            configuration.setProperties(properties);
+
+            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties())
+                .build();
+            MetadataSources metadataSources = new MetadataSources(serviceRegistry);
+            metadataSources.addAnnotatedClass(Customer.class);
+
+            SessionFactory factory = metadataSources.buildMetadata()
+                .buildSessionFactory();
+
+            session = factory.openSession();
+        } catch (HibernateException | IOException e) {
+            fail("Failed to initiate Hibernate Session [Exception:" + e.toString() + "]");
+        }
+    }
+
+    @After
+    public void close() {
+        if (session != null)
+            session.close();
+    }
+
+    @Test
+    public void givenCustomer_whenCallingSerializeCustomerAttributes_thenAttributesAreConverted() throws IOException {
+
+        DAG dag = new DAG();
+        dag.setGraphName("first name");
+
+        Map<String, Object> attributes = new HashMap<>();
+
+		Set set1 = new HashSet();
+        attributes.put("V1", "V2");
+        attributes.put("V1", "V3");
+        attributes.put("V1", "V4");
+
+		set1.add("V2");
+		set1.add("V3");
+		set1.add("V4");
+		
+
+        attributes.put("V1", set1);
+    
+		Set set2 = new HashSet();
+        set2.add("V2", "V5");
+        set2.add("V2", "V6");
+	
+		attributes.put("V2", set2);
+
+        attributes.put("V3", new HashSet().add("V7"));
+
+        dag.setVertexAttributes(attributes);
+
+        customer.serializeVertexAttributes();
+
+        String serialized = customer.getGraphAsJSON();
+
+        customer.setGraphAsJSON(serialized);
+        customer.deserializeVertexAttributes();
+
+        Map<String, Object> deserialized = customer.getVertexAttributes();
+
+        assertEquals("123 Main Street", deserialized.get("address"));
+    }
+
+    @Test
+    public void givenCustomer_whenSaving_thenAttributesAreConverted() {
+
+        Map<String, Object> attributes = new HashMap<>();
+
+		Set set1 = new HashSet();
+        attributes.put("V1", "V2");
+        attributes.put("V1", "V3");
+        attributes.put("V1", "V4");
+
+		set1.add("V2");
+		set1.add("V3");
+		set1.add("V4");
+		
+
+        attributes.put("V1", set1);
+    
+		Set set2 = new HashSet();
+        set2.add("V2", "V5");
+        set2.add("V2", "V6");
+	
+		attributes.put("V2", set2);
+
+        attributes.put("V3", new HashSet().add("V7"));
+
+
+        customer.setVertexAttributes(attributes);
+
+        session.beginTransaction();
+
+        int id = (int) session.save(customer);
+
+        session.flush();
+        session.clear();
+
+        DAG result = session.createNativeQuery("select * from DAG where DAG.id = :id", DAG.class)
+            .setParameter("id", id)
+            .getSingleResult();
+
+        assertEquals(2, result.getVertexAttributes()
+            .size());
+    }
+
+}

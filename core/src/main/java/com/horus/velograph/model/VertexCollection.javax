@@ -1,0 +1,85 @@
+package com.horus.velograph.model;
+
+import java.util.Set;
+import java.util.List;
+import java.util.LinkedHashSet;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.CascadeType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+import javax.persistence.ElementCollection;
+import javax.persistence.CollectionTable;
+import javax.persistence.OneToOne;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.JoinColumns;
+import javax.persistence.IdClass;
+
+@Entity
+public class VertexCollection {
+
+
+  @EmbeddedId @AttributeOverrides({
+        @AttributeOverride(name="investorId", column=@Column(name="T02_INV_ID")),
+        @AttributeOverride(name="issuerId", column=@Column(name="T02_ISS_ID"))
+    })
+    private VertexKey vkey;
+
+
+	
+	
+	
+
+	public VertexCollection() {
+	
+	}
+	
+	public Vertex(String vertId) {
+		this.vertLabel = vertId;
+	}
+	
+	public Long getGraphId() {
+        return this.graphId;
+    }
+
+    public void setGraphId(Long graphId) {
+        this.graphId = graphId;   
+	}
+
+    public Graph getGraph() {
+        return graph;
+    }
+
+    public void setGraph(Graph graph) {
+        this.graph = graph;   
+	}
+
+	public String getVertLabel() {
+		return this.vertLabel;
+	}
+
+
+    public Set<String> getEdgeVertices() {
+        return edgeVertices;
+    }
+
+    public void setEdgeVertices(Set<String> items) {
+        this.edgeVertices = items;
+    }
+	
+	public boolean equals(Object other) {
+								
+		return this.getVertLabel().equals(((Vertex)other).getVertLabel());	
+	
+	}
+
+
+}

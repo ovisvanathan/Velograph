@@ -1,0 +1,216 @@
+package com.horus.velograph.model;
+
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Column;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
+import javax.persistence.CascadeType;
+import javax.persistence.Transient;
+import javax.persistence.JoinColumns;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+
+import com.horus.velograph.api.Utils;
+import com.horus.velograph.service.DAOService;
+
+
+@Entity
+public class Graph<V extends Vertex, E extends Edge> {
+
+	public enum StreamTraversal {
+		BREADTH_FIRST,
+		DEPTH_FIRST
+	};
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long gid;
+
+
+//    @OneToMany(mappedBy = "vert_label", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY)
+  @JoinColumns({ @JoinColumn(name = "vertId"), //, 
+//    referencedColumnName = "vertId"),
+  @JoinColumn(name = "graphId")})
+  //, referencedColumnName = "graphId")}) 	
+	  protected List<Vertex> vertices = new LinkedList();
+
+    @OneToMany(mappedBy = "edgeId", cascade = CascadeType.ALL)
+    protected List<Edge> edgesList = new ArrayList();
+
+	@Column
+    public int edgesCount;
+
+	@Column
+	String name;
+
+	@Transient
+	protected Map<V, List<V>> verticesMap;
+
+	public Graph(String name) {
+		this.name = name;
+	}
+
+
+	enum GraphType {
+		DIRECTED,
+		UNDIRECTED
+	};
+
+	@Enumerated(EnumType.ORDINAL)
+	GraphType graphType;
+	
+    public long getGid() {
+        return gid;
+    }
+
+    public void setGid(long id) {
+        this.gid = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setGid(String name) {
+        this.name = name;
+    }
+
+   public int getNumVertices() {
+        return vertices.size();
+    }
+
+    public int getNumEdges() {
+        return edgesCount;
+    }
+
+   public List<Edge> getEdgesList() {
+        return edgesList;
+    }
+
+    public void setEdgesList(List<Edge> edgesList) {
+        this.edgesList = edgesList;
+    }
+
+    private void validateVertex(V v) {
+        if (!hasVertex(v)) throw new IllegalArgumentException(v.toString() + " is not a vertex");
+    }
+
+    public int degree(V v) {
+        validateVertex(v);
+        return GETVERTEX(v).getEdgeVertices().size();
+    }
+
+	private Vertex GETVERTEX(V v) {
+		return vertices.get(vertices.indexOf(v));
+	}
+
+    public void addEdge(String vs1, String vs2) {
+		addEdge((V)Utils.mv(vs1), (V)Utils.mv(vs2));
+	}
+
+
+    public void addEdge(V v, V w) {
+      
+		if (!hasVertex(v)) addVertex(v);
+        if (!hasVertex(w)) addVertex(w);
+
+        if (!hasEdge(v, w)) edgesCount++;	
+		
+		Edge e2 = new Edge();
+		e2.setGraph(this);
+		if(this.graphType != GraphType.DIRECTED) {
+
+				e2.setVertex1(w.getVertLabel());				
+				e2.setVertex2(v.getVertLabel());				
+				w.getEdgeVertices().add(v.getVertLabel());
+		}
+
+			e2.setVertex1(v.getVertLabel());				
+			e2.setVertex2(w.getVertLabel());				
+			
+			GETVERTEX(v).getEdgeVertices().add(w.getVertLabel());			
+			edgesList.add(e2);
+		
+    }
+
+
+
+    public void addVertex(V v) {
+		System.out.println("in addvert v =" + v.getVertLabel());
+        if (!hasVertex(v)) {
+	//		v.setGraph(this);
+			vertices.add(v);
+			return;
+		}
+	
+	}
+
+    public boolean hasEdge(V v, V w) {
+        validateVertex(v);
+        validateVertex(w);
+	
+		return vertices.get(vertices.indexOf(v)).getEdgeVertices().contains(w.getVertLabel());			
+    }
+
+    public boolean hasVertex(V v) {
+        return vertices.contains(v);
+    }
+	
+	
+	public Map<V, List<V>> getVerticesMap() {
+	
+		if(this.verticesMap == null) {
+	
+			this.verticesMap = new HashMap();
+		
+			Map vmap = new HashMap();
+			for(Vertex vx : vertices) {		
+				vmap.put(vx.getVertLabel(), vx);
+			
+				List edgeSet = new ArrayList();
+		
+				for(Edge eg : this.getEdgesList()) {
+				
+					String v1 = eg.getVertex1();
+					String v2 = eg.getVertex2();
+
+					V vt1 = (V) vmap.get(v1);				
+					V vt2 = (V) vmap.get(v2);
+					
+					if(vt1 != vx)
+						edgeSet.add(vt1);
+
+					if(vt2 != vx)
+						edgeSet.add(vt2);
+
+				}
+
+				this.verticesMap.put((V)vx, edgeSet);
+			}
+			
+		}
+		
+		return this.verticesMap;
+	}
+
+	public List<V> getVertices(StreamTraversal vst) {
+		return null;
+	}
+
+
+}

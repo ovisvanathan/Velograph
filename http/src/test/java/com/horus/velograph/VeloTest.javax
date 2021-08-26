@@ -1,0 +1,119 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package com.hapnel.velograph;
+
+import org.junit.Test;
+import org.junit.Before;
+
+import java.util.Date;
+
+import static org.junit.Assert.assertEquals;
+
+import com.hapnel.velograph.Graph;
+
+import java.util.Iterator;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
+		 
+import com.hapnel.velograph.entity.*;
+
+
+public class VeloTest {
+	
+	@PersistenceContext
+	EntityManager em;
+	
+	@Before 
+	public void start() {
+		
+			try {
+		
+			//		pmf = JDOHelper.getPersistenceManagerFactory(getClass().getClassLoader().getResourceAsStream("Tutorial.properties"));
+		
+			} catch(Exception e) {}
+
+        System.out.println("DataNucleus AccessPlatform with JDO");
+        System.out.println("===================================");
+
+        // Persistence of a Product and a Book.
+  //      pm = pmf.getPersistenceManager();
+  //     tx=pm.currentTransaction();
+	}
+	
+	
+    @Test
+    public void shouldCreateGraph() {
+
+		Graph<String> graph = Graph.makeGraph<>();
+
+        graph.addEdge("A", "B");
+        graph.addEdge("A", "C");
+        graph.addEdge("C", "D");
+        graph.addEdge("D", "E");
+        graph.addEdge("D", "G");
+        graph.addEdge("E", "G");
+        graph.addVertex("H");
+
+        System.out.println(graph);
+
+        System.out.println("Vertices: " + graph.getNumVertices());
+        System.out.println("Edges: " + graph.getNumEdges());
+    
+		em.persist(graph);
+		
+	}
+	
+	@Test
+	public void testJPA() {
+		
+		
+		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "RivuChk_JPA" );
+	   	EntityManager entitymanager = emfactory.createEntityManager( );	   	
+		entitymanager.getTransaction( ).begin( );
+				
+		Department dept = new Department(5, "science");		
+				
+				
+		Job job = new Job();
+		
+		job.setDesignation("scientist");
+
+		entitymanager.persist(job);
+			
+		Employee emp = new Employee();
+
+	//	emp.setEid(1078);
+		emp.setEname("musor");
+		emp.setSalary(1000);
+		
+		emp.setDepartment(dept);
+		emp.setJob(job);
+					
+		entitymanager.persist(emp);
+
+		entitymanager.getTransaction( ).commit( );
+		
+    }
+	
+}

@@ -1,0 +1,257 @@
+package com.horus.velograph;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.jcr.NoSuchWorkspaceException;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Transient;
+import javax.persistence.MappedSuperclass;
+
+import org.apache.jackrabbit.oak.Oak;
+import org.apache.jackrabbit.oak.api.ContentRepository;
+import org.apache.jackrabbit.oak.api.ContentSession;
+import org.apache.jackrabbit.oak.spi.security.OpenSecurityProvider;
+
+import com.horus.velograph.api.Edge;
+import com.horus.velograph.api.Vertex;
+import com.horus.velograph.api.User;
+
+// based on the work of Robert Sedgewick and Kevin Wayne
+@MappedSuperclass
+public abstract class Graph<V extends Vertex, T extends Edge>  {
+
+	@Transient
+	public Map<V, Set<V>> verticesMap = new HashMap<>();
+
+	@Transient
+    public int edgesCount;
+
+	
+//	@OneToMany(targetEntity=Edge.class)
+ //   @JoinColumn(name="gid")
+//	List<T> edgesList = new LinkedList();
+	
+	
+	long gid;
+
+	@OneToOne
+    @JoinColumn(name="client_id")
+	User clientId;
+		
+	@Transient	
+	boolean equalsInverse;
+
+	@Transient
+	int eid;
+	
+	
+	public Map getVertices() {
+		return verticesMap;
+	}
+
+	
+	public int getEid() {
+		return eid;
+	}
+
+	public void setEid(int eid) {
+		this.eid = eid;
+	}
+
+	enum GraphType {
+		DIRECTED,
+		UNDIRECTED
+	};
+
+	protected enum StreamTraversal {	
+		DEPTH_FIRST,
+		BREADTH_FIRST,
+		MIXED	
+	};
+
+	GraphType graphType;
+
+	protected StreamTraversal traversalType;
+	
+	@Column(name="graph_name")
+	String name;
+	
+	public Graph() {
+	}
+	
+	
+	public Graph(String name) {
+		this.name = name;
+	}
+			
+	
+    protected Graph(GraphType g) {
+		
+		this.graphType = g;
+		
+        verticesMap = new HashMap<>();
+		
+		try {
+			oakInit();
+					
+		} catch(Throwable t) {
+			t.printStackTrace();
+		}
+    }
+	
+	public void setTraversalType(StreamTraversal traversalType) {
+		this.traversalType = traversalType;
+	}
+	
+	private void oakInit() throws Exception {
+	
+		ContentRepository repo = new Oak().with("test").with(new OpenSecurityProvider()).createContentRepository();
+
+        String[] valid = new String[] {null, "test"};
+        for (String wspName : valid) {
+            ContentSession cs = null;
+            try {
+                cs = repo.login(null, wspName);
+                assertEquals("test", cs.getWorkspaceName());
+            } finally {
+                if (cs != null) {
+                    cs.close();
+                }
+            }
+        }
+
+        String[] invalid = new String[] {"", "another", Oak.DEFAULT_WORKSPACE_NAME};
+        for (String wspName : invalid) {
+            ContentSession cs = null;
+            try {
+                cs = repo.login(null, wspName);
+                fail("invalid workspace nam");
+            } catch (NoSuchWorkspaceException e) {
+                // success
+            } finally {
+                if (cs != null) {
+                    cs.close();
+                }
+            }
+        }
+	}
+
+    public int getNumVertices() {
+        return verticesMap.size();
+    }
+
+    public int getNumEdges() {
+        return edgesCount;
+    }
+
+
+    private void validateVertex(V v) {
+        if (!hasVertex(v)) throw new IllegalArgumentException(v.toString() + " is not a vertex");
+    }
+
+    public int degree(V v) {
+        validateVertex(v);
+        return verticesMap.get(v).size();
+    }
+
+	
+    public void addEdge(V v, V w) {
+        if (!hasVertex(v)) addVertex(v);
+        if (!hasVertex(w)) addVertex(w);
+        if (!hasEdge(v, w)) edgesCount++;
+        
+		if(this.graphType == GraphType.DIRECTED) {
+			verticesMap.get(v).add(w);
+			edgesList.add((T) new Edge(v, w));
+			return;
+		}
+
+		edgesList.add((T) new Edge(w, v));        
+		verticesMap.get(w).add(v);
+    }
+
+    public void addVertex(V v) {
+        if (!hasVertex(v)) verticesMap.put(v, new HashSet<V>());
+    }
+
+    public boolean hasEdge(V v, V w) {
+        validateVertex(v);
+        validateVertex(w);
+        return verticesMap.get(v).contains(w);
+    }
+
+    public boolean hasVertex(V v) {
+        return verticesMap.containsKey(v);
+    }
+	
+
+//    @Override
+    public Iterator<V> iterator() {
+        return verticesMap.keySet().iterator();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        for (V v: verticesMap.keySet()) {
+            builder.append(v.toString() + ": ");
+            for (V w: verticesMap.get(v)) {
+                builder.append(w.toString() + " ");
+            }
+            builder.append("\n");
+        }
+
+        return builder.toString();
+    }
+		
+	public static Graph makeGraph() {
+	//	return new CollectionsGraph();			
+		return new DAG();		
+	}
+	
+
+	static Vertex mv(String name) {
+		return new Vertex(name);
+	}	
+		
+    public static void main(String[] args) {
+//        Graph<String> graph = new Graph<>();
+
+        Graph<Vertex, Edge> graph = Graph.makeGraph();
+
+        graph.addEdge(mv("A"), mv("B"));
+        graph.addEdge(mv("A"), mv("C"));
+        graph.addEdge(mv("C"), mv("D"));
+        graph.addEdge(mv("D"), mv("T"));
+        graph.addEdge(mv("D"), mv("G"));
+        graph.addEdge(mv("T"), mv("G"));
+        graph.addVertex(mv("H"));
+
+        System.out.println(graph);
+
+        System.out.println("Vertices: " + graph.getNumVertices());
+        System.out.println("Edges: " + graph.getNumEdges());
+    }
+
+	
+	// Graph collections API methods
+
+}

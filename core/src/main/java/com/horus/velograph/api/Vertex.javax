@@ -1,0 +1,72 @@
+package com.horus.velograph.api;
+
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import com.horus.velograph.DAG;
+
+@Entity
+public class Vertex implements java.io.Serializable {
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	String name;
+	
+//	@Id
+//	@GeneratedValue(strategy = GenerationType.AUTO)
+//	Long id;
+	
+//	@Transient
+//	boolean isParent;
+
+//	@OneToMany
+//	List<Vertex> vertices;
+	
+//	@ManyToOne
+//	@JoinColumn(name="graph_name")
+//	DAG parent;
+	
+	public Vertex() {
+	}
+	
+	public Vertex(String name2) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+	
+	/*
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	*/
+			
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/*
+	public boolean isParent() {
+		return isParent;
+	}
+
+	public void setParent(boolean isParent) {
+		this.isParent = isParent;
+	}
+	*/
+	
+}

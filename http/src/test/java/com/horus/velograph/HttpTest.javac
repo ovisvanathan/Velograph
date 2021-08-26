@@ -1,0 +1,170 @@
+package com.horus.velograph;
+
+import com.github.mjeanroy.junit.servers.annotations.TestServer;
+import com.github.mjeanroy.junit.servers.jetty.EmbeddedJetty;
+import com.github.mjeanroy.junit.servers.junit4.JunitServerRunner;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+
+import org.junit.Before;
+
+import com.horus.velograph.entity.*;
+import com.horus.velograph.model.*;
+import com.horus.velograph.api.*;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+
+@RunWith(JunitServerRunner.class)
+public class HttpTest {
+  @TestServer
+  public static EmbeddedJetty jetty;
+
+	private static final String BASE_URL = "http://localhost:9191" + "/okhttp";
+
+	OkHttpClient client;
+
+	@Before
+    public void init() {
+        client = new OkHttpClient();
+    }
+	
+  @Test
+  public void should_have_index() {
+    OkHttpClient client = new OkHttpClient();
+    Request request = new Request.Builder()
+      .url(jetty.getUrl())
+      .build();
+
+    Response response = client.newCall(request).execute();
+
+    Assert.assertEquals(200, response.code());
+  }
+  
+
+  @Test
+	public void testGetGift() throws IOException {
+		whenGetRequest_thenCorrect("gifts");
+	}
+
+
+	@Test  
+	void testPostCountry() {
+		RequestBody formBody = new Request.Builder()
+		  .queryParam("id", "27")
+		  .queryParam("countryName", "Poland")
+		  .queryParam("population", 270000000)
+		  .build();
+
+		whenSendPostRequest_thenCorrect(formBody, "countries", "POST");
+	}
+
+	@Test
+	public void testGetCountry() throws IOException {
+		whenGetRequest_thenCorrect("countries/27");
+	}
+
+	@Test  
+	void testUpdateCountry() {		
+		RequestBody formBody = new Request.Builder()
+		  .queryParam("id", "27")
+		  .queryParam("countryName", "Poland")
+		  .queryParam("population", 312000000)
+		  .build();
+
+		whenSendPostRequest_thenCorrect(formBody, "countries", "PUT");
+	}
+
+	@Test
+	public void testGetCountry3() throws IOException {
+		whenGetRequest_thenCorrect("countries/27");
+	}
+
+	@Test  
+	void testAddCountry() {
+		RequestBody formBody = new Request.Builder()
+		  .queryParam("id", "317")
+		  .queryParam("countryName", "aingano")
+		  .queryParam("population", 17000000)
+		  .build();
+
+		whenSendPostRequest_thenCorrect(formBody, "countries", "POST");
+	}
+
+	@Test
+	public void testGetCountry1() throws IOException {
+		whenGetRequest_thenCorrect("countries/317");
+	}
+
+	@Test  
+	void testDeleteCountry() {
+		RequestBody formBody = new Request.Builder()
+		  .build();
+
+		whenSendPostRequest_thenCorrect(formBody, "countries", "DELETE");
+	}
+
+	@Test
+	public void testGetCountry2() throws IOException {
+		whenGetRequest_thenCorrect("countries/27");
+	}
+  
+	  @Test
+	public void whenSendPostRequest_thenCorrect(RequestBody formBody, String path, String method) 
+	  throws IOException {
+
+		Request request = null;
+		if(method.equals("POST"))
+			request = new Request.Builder()
+			  .url(BASE_URL + "/" + path)
+			  .post(formBody)
+			  .build();
+
+		else if(method.equals("PUT"))
+			request = new Request.Builder()
+			  .url(BASE_URL + "/" + path)
+			  .post(formBody)
+			  .build();
+		else if(method.equals("DELETE"))
+			request = new Request.Builder()
+			  .url(BASE_URL + "/" + path)
+			  .post(formBody)
+			  .build();
+
+
+		Call call = client.newCall(request);
+		Response response = call.execute();
+		
+		assertThat(response.code(), equalTo(200));
+	}
+
+	public void whenGetRequest_thenCorrect(String path) throws IOException {
+		Request request = new Request.Builder()
+			.url(BASE_URL + "/" + path)
+				.build();
+
+			Call call = client.newCall(request);
+			Response response = call.execute();
+
+		assertThat(response.code(), equalTo(200));
+
+	}
+
+
+
+}

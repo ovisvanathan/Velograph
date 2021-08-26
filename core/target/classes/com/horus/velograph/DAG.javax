@@ -1,0 +1,159 @@
+package com.horus.velograph;
+
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.LinkedList;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+import javax.persistence.JoinColumn;
+import javax.persistence.CascadeType;
+import javax.persistence.ManyToOne;
+
+import com.horus.velograph.DAG;
+
+
+import com.horus.velograph.api.Edge;
+import com.horus.velograph.api.Vertex;
+
+/*
+ * A node in the graph is a parent if it has degree > 0
+ */
+@Entity 
+public class DAG<V extends Vertex, T extends Edge> extends Graph<V, T> {
+
+	@Id
+	int id;
+
+	@PersistenceContext
+	static EntityManager em;
+	
+	static EntityManagerFactory emFactory;
+	
+	boolean isParent;	
+	
+	@OneToMany(targetEntity=Vertex.class)
+//    @JoinColumn(name="gid")
+	public Set<V> vertices = new HashSet<>();
+
+	
+	@OneToMany(targetEntity=Edge.class)
+ //   @JoinColumn(name="gid")
+	List<T> edgesList = new LinkedList();
+
+	
+	public DAG() {
+
+	}
+
+	
+	public void addEdge9(V v, V w) {
+	
+	//	super.addEdge(v, w);
+	//	addEdge(v, w);
+		
+		int n1 = this.degree(v);
+		int n2 = this.degree(w);
+	
+		/*
+		if(n1 > 0)
+			v.setParent(true);
+		
+		if(n2 > 0)
+			w.setParent(true);
+		*/
+	}
+	
+	private void validateVertex(V v) {
+        if (!hasVertex(v)) throw new IllegalArgumentException(v.toString() + " is not a vertex");
+    }
+
+    public int degree(V v) {
+        validateVertex(v);
+        return verticesMap.get(v).size();
+    }
+
+	
+	public void addEdge(V v, V w) {
+        if (!hasVertex(v)) addVertex(v);
+        if (!hasVertex(w)) addVertex(w);
+        if (!hasEdge(v, w)) edgesCount++;
+        
+		if(this.graphType == GraphType.DIRECTED) {
+			verticesMap.get(v).add(w);
+			edgesList.add((T) new Edge(v, w));
+			return;
+		}
+
+		edgesList.add((T) new Edge(w, v));        
+		verticesMap.get(w).add(v);
+    }
+
+    public void addVertex(V v) {
+        if (!hasVertex(v)) verticesMap.put(v, new HashSet<V>());
+    }
+
+    public boolean hasEdge(V v, V w) {
+        validateVertex(v);
+        validateVertex(w);
+        return verticesMap.get(v).contains(w);
+    }
+
+    public boolean hasVertex(V v) {
+        return verticesMap.containsKey(v);
+    }
+
+
+	
+	 public static void main(String[] args) {
+//       Graph<String> graph = new Graph<>();
+
+       EntityManager entityManager = getEntityManager();
+
+		entityManager.getTransaction().begin();
+  
+       Graph<Vertex, Edge> graph = Graph.makeGraph();
+
+       graph.addEdge(mv("A"), mv("B"));
+       graph.addEdge(mv("A"), mv("C"));
+       graph.addEdge(mv("C"), mv("D"));
+       graph.addEdge(mv("D"), mv("E"));
+       graph.addEdge(mv("D"), mv("G"));
+       graph.addEdge(mv("E"), mv("G"));
+       graph.addVertex(mv("H"));
+
+       System.out.println(graph);
+
+       System.out.println("Vertices: " + graph.getNumVertices());
+       System.out.println("Edges: " + graph.getNumEdges());
+       
+       entityManager.persist(graph);
+	 
+	//	entityManager.flush();
+
+		entityManager.getTransaction().commit();
+
+	 
+	 }
+	
+	static {
+		   emFactory = Persistence.createEntityManagerFactory("Tutorial");
+	}
+			 
+	public static EntityManager getEntityManager() {
+		return emFactory.createEntityManager();	
+	}
+	
+	
+}

@@ -1,0 +1,50 @@
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.2"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+	<!--
+<persistence
+  xmlns="http://java.sun.com/xml/ns/persistence"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+  version="2.0">	
+  -->
+  
+    <!-- Define persistence unit -->
+    <persistence-unit name="RivuChk_JPA"  transaction-type="RESOURCE_LOCAL">
+        <class>com.hapnel.velograph.entity.Employee</class>
+		<class>com.hapnel.velograph.entity.Job</class>
+		<class>com.hapnel.velograph.entity.Department</class>
+		<class>com.hapnel.velograph.entity.Country</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+            <property name="javax.persistence.lock.timeout" value="100"/>
+            <property name="javax.persistence.query.timeout" value="100"/>
+			<property name="javax.persistence.validation.group.pre-persist" value="javax.validation.groups.MyPersistValidation"/>
+            <property name="javax.persistence.validation.group.pre-update" value="javax.validation.groups.MyUpdateValidation"/>
+            <property name="javax.persistence.validation.group.pre-remove" value="javax.validation.groups.MyRemovetValidation"/>
+       		        <!-- database connection -->
+            <property name="javax.persistence.jdbc.driver" value="org.hsqldb.jdbcDriver" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:hsqldb:mem:jpatut" />
+            <property name="javax.persistence.jdbc.user" value="sa" />
+            <property name="javax.persistence.jdbc.password" value="" />
+     	
+		        <!-- DON'T USE THIS IN PRODUCTION -->
+            <!-- automatically drop and create required database tables -->
+            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create" />
+            <property name="javax.persistence.schema-generation.create-script-source" value="create-db.sql" />
+            <property name="javax.persistence.schema-generation.drop-script-source" value="drop-db.sql" />
+            <property name="javax.persistence.sql-load-script-source" value="data.sql" />
+    
+	        <property name="javax.persistence.schema-generation.scripts.action" value="drop-and-create"/>
+            <property name="javax.persistence.schema-generation.scripts.create-target" value="./create.sql"/>
+            <property name="javax.persistence.schema-generation.scripts.drop-target" value="./drop.sql"/>
+             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/>
+   
+        </properties>
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		 <jar-file>target/classes</jar-file>
+		
+    </persistence-unit>
+      
+</persistence>

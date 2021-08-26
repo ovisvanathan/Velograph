@@ -1,0 +1,4 @@
+com\horus\velograph\conf\RestConfig.class
+com\horus\velograph\conf\JerseyConfig.class
+com\horus\velograph\client\JerseyClientIntegrationTest.class
+com\horus\velograph\HttpTest.class

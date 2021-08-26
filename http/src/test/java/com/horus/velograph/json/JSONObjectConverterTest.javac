@@ -1,0 +1,152 @@
+package com.horus.velograph.json;
+
+import java.util.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.Order;
+
+import javax.persistence.Entity;
+
+import org.json.JSONObject;
+
+import junit.framework.TestCase;
+
+import com.horus.velograph.service.DAOService;
+import com.horus.velograph.util.Utils;
+import com.horus.velograph.api.User;
+import com.horus.velograph.entity.*;
+
+
+@TestMethodOrder(OrderAnnotation.class)
+public class JSONObjectConverterTest extends TestCase {
+
+	static Employee emp;
+
+	static String jsonStr;
+	static JSONObject jsonObj;
+
+	static JSONObject empObj;
+
+	static JSONObjectConverter converter = new JSONObjectConverter();
+
+	@Before
+	public void setup() {
+		createEmp();
+	}
+
+	public static void main(String [] args) {
+
+		try {
+
+	//	JSONObjectConverterTest jtest = new JSONObjectConverterTest();
+		
+		createEmp();
+
+
+		String str = converter.convertObjectToDatabaseColumn(emp);	
+		converter.convertJSONToEntity(str);
+	//	jtest.testConvert_from_jsonobject();
+	//	jtest.testConvert_to_jsonobject(emp);
+
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
+	
+	}
+
+
+	@Test
+	public static void createEmp() {
+	
+		emp = new Employee();
+		
+		Job job = new Job();
+		
+		job.setDesignation("Engr");
+		job.setEmployee(emp);
+
+		job.setJobCode("J-001");
+	
+		emp.setJob(job);
+
+		emp.setAge(30);
+		emp.setSalary(25000);
+		emp.setPhoneNumber("555-2159");
+		
+		Department dept = new Department();
+		dept.setDname("controls");
+		
+		emp.setDepartment(dept);
+		emp.setEname("esona");
+	
+		Project p1 = new Project();
+		p1.setTitle("Studio");
+		p1.setProjectCode("P1104");
+		p1.setClient(emp);
+		
+		Project p2 = new Project();
+		p2.setTitle("Mall");
+		p2.setProjectCode("P1107");
+		p2.setClient(emp);
+
+		Project p3 = new Project();
+		p3.setTitle("Nature Villa");
+		p3.setProjectCode("P1108");
+		p3.setClient(emp);
+
+
+		List<Project> eprojects = new ArrayList();
+		eprojects.add(p1);
+		eprojects.add(p2);
+		eprojects.add(p3);
+
+		emp.setProjects(eprojects);
+	
+	}
+
+	/*
+	@Test
+	 @Order(1)    
+    public void testConvertToDatabaseColumn(Object entity) {	
+		jsonStr = converter.convertObjectToDatabaseColumn(emp);
+	
+	}
+
+	@Test
+	@Order(2)    
+    public void testConvertToEntityAttribute(Object entity) {
+	
+		jsonObj = converter.convertToEntityAttribute(jsonStr);
+	
+	}
+	
+	 @Order(3)    
+	public void testConvert_from_jsonobject() throws Exception {
+	
+		Employee result = (Employee) converter.convert_from_jsonobject(Employee.class, jsonObj);
+	
+		assertEquals(result.getEname(), "esona");
+	
+	}
+
+	@Order(4)    
+	public void testConvert_to_jsonobject(Object data) throws Exception {
+		JSONObject jobj = converter.convert_to_jsonobject(data);	
+
+		assertTrue(jobj != null);
+
+		String myValue = (String) jobj.toMap().values().iterator().next();
+
+		String origValue = (String) jsonObj.toMap().values().iterator().next();
+
+		assertEquals(myValue, origValue);
+	
+	}
+	*/	
+		
+}

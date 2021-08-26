@@ -1,0 +1,104 @@
+package com.horus.velograph.api;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
+import javax.persistence.Column;
+import javax.persistence.ManyToOne;
+
+import com.horus.velograph.DAG;
+
+@Entity
+public class Edge<V extends Vertex> {
+
+	@Column
+	double weight;
+
+	@Column
+	String label;	
+	
+	@Id
+	@GeneratedValue(strategy= GenerationType.AUTO)
+	long id;
+	
+	@ManyToOne(targetEntity=Vertex.class)	
+	V v1;
+
+	@ManyToOne(targetEntity=Vertex.class)	
+	V v2;
+
+	enum EdgeDirection {
+		FORWARD,
+		BACKWARD
+	}
+	
+	@Column
+	EdgeDirection edgeDirection;
+
+	public Edge(V v, V w) {
+		this.v1 = v;
+		this.v2 = w;		
+	}
+
+	public Edge(V v, V w, String name) {
+		this.v1 = v;
+		this.v2 = w;		
+		this.label = name;
+	}
+
+	public Edge(V v, V w, String name, double weight) {
+		this.v1 = v;
+		this.v2 = w;		
+		this.label = name;
+		this.weight = weight;
+	}
+
+	/*
+	public Edge(V v, V w, String name, double weight, Object data) {
+		this.v1 = v;
+		this.v2 = w;		
+		this.label = name;
+		this.weight = weight;
+		this.data = data;
+	}
+	*/
+
+	public double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(double weight) {
+		this.weight = weight;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	/*
+	public Object getData() {
+		return data;
+	}
+
+	public void setData(Object data) {
+		this.data = data;
+	}
+	*/
+
+	public EdgeDirection getEdgeDirection() {
+		return edgeDirection;
+	}
+
+	public void setEdgeDirection(EdgeDirection edgeDirection) {
+		this.edgeDirection = edgeDirection;
+	}
+	
+	
+}

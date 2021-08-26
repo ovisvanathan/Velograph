@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!DOCTYPE jdo PUBLIC 
+    "-//Sun Microsystems, Inc.//DTD Java Data Objects Metadata 2.0//EN"
+    "http://java.sun.com/dtd/jdo_2_0.dtd">
+<jdo>
+    <package name="com.hapnel.velograph">
+	<!--
+        <class name="Product" identity-type="datastore" table="JDO_PRODUCTS">
+            <inheritance strategy="new-table"/>
+            <field name="name" persistence-modifier="persistent">
+                <column name="PRODUCT_NAME" length="100" jdbc-type="VARCHAR"/>
+            </field>
+            <field name="description" persistence-modifier="persistent">
+                <column length="255" jdbc-type="VARCHAR"/>
+            </field>
+            <field name="price" persistence-modifier="persistent"/>
+        </class>
+
+        <class name="Book" identity-type="datastore" table="JDO_BOOKS">
+            <inheritance strategy="new-table"/>
+            <field name="author" persistence-modifier="persistent">
+                <column length="40" jdbc-type="VARCHAR"/>
+            </field>
+            <field name="isbn" persistence-modifier="persistent">
+                <column length="20" jdbc-type="CHAR"/>
+            </field>
+            <field name="publisher" persistence-modifier="persistent">
+                <column length="40" jdbc-type="VARCHAR"/>
+            </field>
+        </class>
+	-->		
+		<class name="Department" identity-type="application" table="DEPT">
+            <field name="id" primary-key="true" null-value="exception">
+                <column name="DEPTID"/>
+            </field>
+            <field name="name" persistence-modifier="persistent">
+                <column name="DNAME"/>
+            </field>
+            <field name="location" persistence-modifier="persistent">
+                <column name="LOC"/>
+            </field>
+        </class>
+		        <class name="Employee" table="EMP">
+            <datastore-identity strategy="increment">
+                <column name="EMPNO"/>
+            </datastore-identity>
+            <field name="department" persistence-modifier="persistent">
+                <column name="DEPTID"/>
+            </field>
+            <field name="name" persistence-modifier="persistent">
+                <column name="ENAME"/>
+            </field>
+            <field name="salary" persistence-modifier="persistent">
+                <column name="SAL"/>
+            </field>
+            <field name="projects" persistence-modifier="persistent" mapped-by="employee">
+                <collection element-type="com.hapnel.velograph.model.Project">
+                </collection>
+            </field>
+        </class>
+        <class name="Project" identity-type="application">
+            <field name="id" primary-key="true" persistence-modifier="persistent">
+                <column name="PROJECTID"/>
+            </field>
+            <field name="name" persistence-modifier="persistent">
+                <column name="PNAME"/>
+            </field>
+            <field name="employee" persistence-modifier="persistent">
+                <column name="EMPNO"/>      
+            </field>
+        </class>
+
+    </package>
+</jdo>

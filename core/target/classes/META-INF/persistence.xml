@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.2"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+    <persistence-unit name="Tutorial" transaction-type="RESOURCE_LOCAL">
+        <description>My Persistence Unit</description>
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<class>com.horus.velograph.entity.Employee</class>
+        <class>com.horus.velograph.entity.Department</class>
+        <class>com.horus.velograph.entity.Projects</class>
+        <class>com.horus.velograph.entity.Job</class>
+        <class>com.horus.velograph.model.Graph</class>
+        <class>com.horus.velograph.model.Vertex</class>
+        <class>com.horus.velograph.model.Edge</class>
+        <class>com.horus.velograph.api.User</class>
+        <class>com.horus.velograph.model.DAG</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
+            <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+            <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/javahelps"/>
+            <property name="hibernate.connection.username" value="root"/>
+            <property name="hibernate.connection.password" value="ovis123"/>
+            <property name="hibernate.id.new_generator_mappings" value="false"/>			
+			<property name="hibernate.hbm2ddl.auto" value="create-drop"/>			
+			<property name="hibernate.id.new_generator_mappings" value="true"/>						
+			<property name="hibernate.show_sql" value="true"/>						
+        </properties>
+    </persistence-unit>
+</persistence>

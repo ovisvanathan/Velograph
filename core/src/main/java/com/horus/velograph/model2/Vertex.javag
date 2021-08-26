@@ -1,0 +1,107 @@
+package com.horus.velograph.model;
+
+import java.util.Set;
+import java.util.List;
+import java.util.LinkedHashSet;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.CascadeType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+import javax.persistence.ElementCollection;
+import javax.persistence.CollectionTable;
+import javax.persistence.OneToOne;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.JoinColumns;
+import javax.persistence.IdClass;
+
+@Entity
+@IdClass(VertexKey.class)
+public class Vertex {
+
+	@ElementCollection // 1
+    @CollectionTable(name = "vertex_edge") // , joinColumns = @JoinColumn(name = "id")) // 2
+//   @CollectionTable(name = "vertex_edge") //, joinColumns = { @JoinColumn(name = "vertLabel") })// 2
+//	@JoinColumns({
+//	  @JoinColumn(name = "vertLabel", insertable = false, updatable = false),
+//	  @JoinColumn(name = "graphId", insertable = false, updatable = false)
+//	})
+    @Column(name = "v_id") // 3
+	Set<String> edgeVertices = new LinkedHashSet();
+
+
+	@Id
+//	@Column(name = "vert_id",unique=true,columnDefinition="VARCHAR(64)")
+//	String vert_label;	
+//	@Id
+//	VertexKey vkey;
+	@Column(name="vert_id")
+	String vertLabel;
+
+	@Id
+	@Column(name="graph_id")
+	Long graphId;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+	Edge e1;
+
+	@OneToOne(cascade = CascadeType.ALL)
+ //   @JoinColumn(name="gid", insertable=false, updatable=false)
+//	@JoinColumns( {
+ //   @JoinColumn(name="vert_id", nullable = false),
+ //   @JoinColumn(name="graph_id", nullable = false)} )
+	Graph graph;
+
+	public Vertex() {
+	
+	}
+	
+	public Vertex(String vertId) {
+		this.vertLabel = vertId;
+	}
+	
+	public Long getGraphId() {
+        return this.graphId;
+    }
+
+    public void setGraphId(Long graphId) {
+        this.graphId = graphId;   
+	}
+
+    public Graph getGraph() {
+        return graph;
+    }
+
+    public void setGraph(Graph graph) {
+        this.graph = graph;   
+	}
+
+	public String getVertLabel() {
+		return this.vertLabel;
+	}
+
+
+    public Set<String> getEdgeVertices() {
+        return edgeVertices;
+    }
+
+    public void setEdgeVertices(Set<String> items) {
+        this.edgeVertices = items;
+    }
+	
+	public boolean equals(Object other) {
+								
+		return this.getVertLabel().equals(((Vertex)other).getVertLabel());	
+	
+	}
+
+
+}

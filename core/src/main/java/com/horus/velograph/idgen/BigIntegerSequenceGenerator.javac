@@ -1,0 +1,28 @@
+package com.horus.velograph.idgen;
+
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
+import java.io.Serializable;
+import java.util.Properties;
+
+import org.hibernate.HibernateException;
+import org.hibernate.boot.MappingException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.LongType;
+import org.hibernate.type.Type;
+
+public class BigIntegerSequenceGenerator extends SequenceGenerator {
+	
+	@Override
+    public Serializable generate(SessionImplementor session, Object obj)
+    {
+
+		long timestamp = System.currentTimeMillis();
+		long id = timestamp << (63-41);
+		id |= nodeId << (63-41-10);
+		id |= seqNum;
+		
+		
+	
+    }
+}

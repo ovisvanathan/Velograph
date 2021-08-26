@@ -1,0 +1,344 @@
+package com.horus.velograph.coll;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Queue;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.Arrays;
+
+import com.horus.velograph.model.Graph;
+import com.horus.velograph.model.Vertex;
+import com.horus.velograph.model.Edge;
+import com.horus.velograph.service.GraphService;
+
+public class CollectionsGraph<V extends Vertex, E extends Edge> extends Graph implements Collection<V> {
+
+	StreamTraversal traversalType;
+
+	List<V> visited_list = new ArrayList();
+	
+	Queue<V> traversal_queue = new BlockingQueue();
+	
+	List<List> esets;
+
+	List<V> s1;
+
+	public CollectionsGraph() {
+		super("VELOGRAPH");
+	}
+	
+	public CollectionsGraph(String name) {
+		super(name);
+	}
+
+	public boolean	add(V v) {
+		try {
+		
+				addVertex(v);
+		
+		} catch(Exception e) {}
+		
+		return true;
+	}
+
+	public boolean	add(V v1, V v2)  throws Exception {
+		
+		if(!hasVertex(v1))
+			addVertex(v1);
+		if(!hasVertex(v2))
+			addVertex(v2);
+	
+		if(!hasEdge(v1, v2))
+			edgesCount++;
+		
+		addEdge(v1, v2);
+		return true;
+	}
+
+	public boolean	addAll(Collection<? extends V> c) {		
+		vertices.addAll(c);		
+		return true;
+	}
+
+	public void	clear() {
+		vertices.clear();
+	}
+
+	public boolean	contains(Object o) {
+		return vertices.contains(o);
+	}
+
+	public boolean	containsAll(Collection<?> c) {
+	
+		boolean b = true;
+		Map dupsMap = new HashMap();
+		for(Object v1 : c) {
+			V v = (V) v1;	
+			if(!vertices.contains(v)) {
+				b &= false;
+			} else {			
+				b &= true;	
+			}
+		}		
+		
+		return b;
+		
+	}
+
+	public boolean	equals(Object o) {
+	
+		if(this == o)
+			return true;
+		
+		if(o instanceof CollectionsGraph) {
+		
+			CollectionsGraph cgo = (CollectionsGraph) o;
+				
+			boolean p1 = this.size() == cgo.size();	
+			
+			boolean p = false;
+			for(Object x : cgo) 
+				p &= vertices.contains(x);
+			
+			
+			if(p && (p1 && p))
+				return true;
+			
+		}
+	
+		return false;
+	}
+	
+
+	public int	hashCode() {
+		return this.hashCode() + 15;
+	}
+
+	public boolean	isEmpty() {
+		return vertices.size() == 0;
+	}
+	
+	public Iterator<V>	iterator() {
+		return iterator();
+	}
+
+	public Stream<V>	parallelStream() {
+		return vertices.stream();
+	}
+
+	private <E> List<E>
+    removeEdgeUsingIterator(List<E> l, Predicate<E> p)
+    {
+ 
+        // Create an iterator from the l
+        Iterator<E> itr = l.iterator();
+ 
+        // Find and remove all null
+        while (itr.hasNext()) {
+ 
+            // Fetching the next element
+            E t = itr.next();
+ 
+            // Checking for Predicate condition
+            if (!p.test(t)) {
+ 
+                // If the condition matches,
+                // remove that element
+                itr.remove();
+            }
+        }
+ 
+        // Return the null
+        return l;
+    }
+		
+	public boolean	remove(Object o) {
+		final Vertex vo = (Vertex) o;
+		
+		if(vertices.contains(vo)) {
+		
+	//		Graph g = vo.getGraph();
+
+	List list = 		GraphService.getGraphs();
+		Graph g =	GraphService.getGraphById(5L);
+
+			edgesList = g.getEdgesList();
+
+			edgesList = removeEdgeUsingIterator(edgesList, 
+					(E u) ->  u.getVertex1().equals(vo.getVertLabel()) || u.getVertex2().equals(vo.getVertLabel()) );			
+		}
+		
+		vertices.remove(vo);		
+		return true;	
+	}
+	
+	public boolean	removeAll(Collection<?> c) {	
+		return true;	
+	}
+
+	public  boolean	removeIf(Predicate<? super V> filter) {
+		
+		return true;
+	}
+
+	public boolean	retainAll(Collection<?> c) { return  true; }
+	
+	public int	size() {
+		return vertices.size();
+	}
+	
+	public Stream<V>	stream() {
+	
+		if(traversalType == null)
+			return vertices.stream();
+		else if(traversalType == StreamTraversal.DEPTH_FIRST) {
+		
+			Supplier s = () -> getVertices(StreamTraversal.DEPTH_FIRST);
+			return Stream.generate(s);
+		
+		
+		} else if(traversalType == StreamTraversal.BREADTH_FIRST) {
+			//simplest. we stream the associated hashset 
+		
+			Supplier s = () -> getVertices(StreamTraversal.BREADTH_FIRST);
+			return Stream.generate(s);
+		
+		} 
+
+		return null;
+	}
+
+	public Object[]	toArray() {
+	
+		return vertices.toArray();
+   
+	}
+
+	public <V> V[]	toArray(V[] a) {		
+		return null;
+	}
+
+	public List<V> getVertices(StreamTraversal vst) {
+		
+		Map vertices = verticesMap;
+
+		List<V> list = new LinkedList();
+		
+		int mark = 0;
+		int START = 0;
+		if(list == null)
+			mark = START;
+
+		V sel = null;
+
+ 		esets = new LinkedList();
+
+		if(vst == StreamTraversal.BREADTH_FIRST) {
+
+			/*
+			Thread BFSVisitor = new Thread(() -> {
+			
+					Vertex v2 = traversal_queue.first(v)
+					visit(v2)
+				
+					sleep(10)	
+			}).start()
+			*/
+	
+			final Map<String, List<V>> verts = this.getVerticesMap();
+
+			Thread vertgen = new Thread(() -> {
+
+				Collection vkcs = vertices.values();
+				Iterator ixt = vkcs.iterator();
+			
+				while(ixt.hasNext()) {
+
+					Vertex value = (Vertex) ixt.next();	
+					
+					if(!visited_list.contains(value)) {
+						traversal_queue.add(value);			
+						visited_list.add(value);				
+
+						List<String> edgeset = value.getEdgesList();
+							
+						esets.add(edgeset);			
+						visited_list.addAll(edgeset);				
+					}
+			
+				}
+					
+			
+			});
+			
+			vertgen.start();
+
+			
+		} else  if(vst == StreamTraversal.DEPTH_FIRST) {
+
+			/*
+			Thread DFSVisitor = new Thread(() -> {
+			
+					Vertex v2 = traversal_queue.first(v)
+					visit(v2)
+				
+					sleep(10)	
+			}).start()
+			*/
+
+
+			Thread vertgen = new Thread(() -> {
+
+				Collection vkcs = vertices.values();
+				Iterator ixt = vkcs.iterator();
+
+				while(ixt.hasNext())
+						Vertex value = (Vertex) ixt.next();
+						dfssearch(value);
+				}
+										
+			});
+			
+			vertgen.start();
+			
+		} 
+		
+		return (List) traversal_queue;
+	
+	}
+
+
+	private void dfssearch(V tmp) {
+		
+		Graph g = tmp.getGraph();
+		if(!visited_list.contains(tmp)) {
+			traversal_queue.add(tmp);			
+			visited_list.add(tmp);				
+													
+			Set<String> edgeset = tmp.getEdgeVertices();								
+
+			Map<String, V> vmap = g.getVerticesMap();
+			
+			for(String xs : edgeset)
+				dfssearch(vmap.get(xs));	
+	
+		}	
+	}
+
+	private void visit(V vertex) {	
+		System.out.println("visited vertex " + vertex.getVertLabel());	
+	}
+
+}
